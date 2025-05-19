@@ -129,17 +129,20 @@ def calculate_aggregated_metrics(df):
             'unique_machines': 0,
             'total_duration': pd.Timedelta(0),
             'avg_duration': pd.Timedelta(0),
-            'monthly_counts': pd.Series(),
+            'monthly_counts': pd.Series(dtype=int),
             'machine_stats': pd.DataFrame()
         }
     
     try:
+        # Calculate monthly counts as integers
+        monthly_counts = df.groupby('Ano-Mês').size()
+        
         metrics = {
             'total_records': len(df),
             'unique_machines': df['Máquina'].nunique(),
             'total_duration': df['Duração'].sum(),
             'avg_duration': df['Duração'].mean(),
-            'monthly_counts': df.groupby('Ano-Mês').size(),
+            'monthly_counts': monthly_counts,  # Now storing as integer counts
             'machine_stats': df.groupby('Máquina').agg({
                 'Duração': ['count', 'sum', 'mean']
             })
@@ -152,6 +155,6 @@ def calculate_aggregated_metrics(df):
             'unique_machines': 0,
             'total_duration': pd.Timedelta(0),
             'avg_duration': pd.Timedelta(0),
-            'monthly_counts': pd.Series(),
+            'monthly_counts': pd.Series(dtype=int),
             'machine_stats': pd.DataFrame()
         }
