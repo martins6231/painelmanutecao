@@ -1,0 +1,377 @@
+import streamlit as st
+import json
+from functools import lru_cache
+
+# Define translations
+translations = {
+    "pt": {
+        # Main menu and titles
+        "machine_efficiency_analysis": "Análise de Eficiência de Máquinas",
+        "dashboard": "Dashboard",
+        "comparison": "Comparação",
+        "data": "Dados",
+        "about": "Sobre",
+        
+        # Common terms
+        "all": "Todas",
+        "all_months": "Todos os Meses",
+        "analyze": "Analisar",
+        "apply": "Aplicar",
+        "availability": "Disponibilidade",
+        "clear_data": "Limpar Dados",
+        "compare": "Comparar",
+        "comparison": "Comparação",
+        "developed_with": "Desenvolvido com",
+        "download": "Baixar",
+        "duration": "Duração",
+        "duration_minutes": "Duração (minutos)",
+        "efficiency": "Eficiência Operacional",
+        "export": "Exportar",
+        "filter_by": "Filtrar por",
+        "frequency": "Frequência",
+        "from": "De",
+        "january": "Janeiro",
+        "february": "Fevereiro",
+        "march": "Março",
+        "april": "Abril",
+        "may": "Maio",
+        "june": "Junho",
+        "july": "Julho",
+        "august": "Agosto",
+        "september": "Setembro",
+        "october": "Outubro",
+        "november": "Novembro",
+        "december": "Dezembro",
+        "last_update": "Última atualização",
+        "machine": "Máquina",
+        "month": "Mês",
+        "mtbf": "MTBF",
+        "mttr": "MTTR",
+        "number_of_stoppages": "Número de Paradas",
+        "period": "Período",
+        "period_select": "Selecionar Período",
+        "responsible_area": "Área Responsável",
+        "results": "Resultados",
+        "results_analysis": "Resultados da Análise",
+        "select": "Selecione",
+        "select_file": "Selecione um arquivo",
+        "select_language": "Selecionar Idioma",
+        "select_machine": "Selecione a Máquina",
+        "select_month": "Selecione o Mês",
+        "showing": "Mostrando",
+        "stoppages": "Paradas",
+        "stoppage_cause": "Causa da Parada",
+        "stoppage_type": "Tipo de Parada",
+        "summary": "Resumo",
+        "to": "Até",
+        "total_duration_hours": "Duração Total (horas)",
+        "upload": "Upload",
+        "using": "usando",
+        "version": "Versão",
+        
+        # Dashboard page
+        "data_upload": "Upload de Dados",
+        "select_excel_file": "Selecione um arquivo Excel com os dados de paradas",
+        "file_loaded_success": "Arquivo carregado com sucesso!",
+        "records_processed": "registros processados.",
+        "error_processing_file": "Erro ao processar o arquivo:",
+        "analysis_filters": "Filtros de Análise",
+        "select_machine": "Selecione a Máquina:",
+        "select_month": "Selecione o Mês:",
+        "custom_period": "Período Personalizado",
+        "period_start": "Data Inicial:",
+        "period_end": "Data Final:",
+        "analyze_button": "Analisar",
+        "analysis_summary": "Resumo da Análise",
+        "period_analyzed": "Período Analisado:",
+        "machine": "Máquina:",
+        "scheduled_time": "Tempo Programado:",
+        "total_stoppages": "Total de Paradas:",
+        "total_stoppage_time": "Tempo Total de Paradas:",
+        "average_time_per_stoppage": "Tempo Médio por Parada:",
+        "summary_tables": "Tabelas de Resumo",
+        "top_10_most_frequent": "Top 10 Paradas Mais Frequentes",
+        "top_10_longest": "Top 10 Paradas Mais Longas",
+        "temporal_analysis": "Análise Temporal",
+        "graphical_analysis": "Análise Gráfica",
+        "critical_stoppages_analysis": "Análise de Paradas Críticas",
+        "recommendations": "Recomendações",
+        "insights_recommended_actions": "Insights e Ações Recomendadas",
+        "export_results": "Exportar Resultados",
+        "download_analyzed_data": "Baixar dados analisados",
+        "download_critical_stoppages": "Baixar paradas críticas",
+        
+        # Chart titles
+        "pareto_stoppages_title": "Pareto de Causas de Paradas (Top 10 por Duração)",
+        "stoppages_by_area_title": "Índice de Paradas por Área Responsável",
+        "stoppages_by_month_title": "Taxa de Ocorrência de Paradas por Mês",
+        "total_duration_by_month_title": "Duração Total de Paradas por Mês",
+        "total_time_by_area_title": "Tempo Total de Paradas por Área",
+        "critical_stoppages_title": "Top 10 Paradas Críticas (>1h)",
+        "critical_stoppages_by_area_title": "Distribuição de Paradas Críticas por Área",
+        "duration_distribution_title": "Distribuição da Duração das Paradas",
+        
+        # Comparison page
+        "period_comparison": "Comparação de Períodos",
+        "period_1": "Período 1",
+        "period_2": "Período 2",
+        "comparison_period_start": "Data Inicial",
+        "comparison_period_end": "Data Final",
+        "compare_button": "Comparar Períodos",
+        "comparison_results": "Resultados da Comparação",
+        "period_1_summary": "Resumo do Período 1",
+        "period_2_summary": "Resumo do Período 2",
+        "evolution": "Evolução",
+        "metrics_comparison": "Comparação de Métricas",
+        "key_indicators": "Indicadores Chave",
+        "improved": "Melhorou",
+        "worsened": "Piorou",
+        "unchanged": "Sem alteração",
+        "comparison_conclusions": "Conclusões da Comparação",
+        
+        # Data page
+        "data_visualization": "Visualização dos Dados",
+        "filter_by_machine": "Filtrar por Máquina:",
+        "filter_by_month": "Filtrar por Mês:",
+        "showing_records": "Mostrando registros",
+        "download_filtered_data": "Baixar dados filtrados",
+        "basic_statistics": "Estatísticas Básicas",
+        "summary_by_machine": "Resumo por Máquina",
+        "number_of_stoppages": "Número de Paradas",
+        "total_duration": "Duração Total",
+        "average_duration": "Duração Média",
+        "download_machine_summary": "Baixar resumo por máquina",
+        "additional_analyses": "Análises Adicionais",
+        "distribution_by_weekday": "Distribuição por Dia da Semana",
+        "distribution_by_hour": "Distribuição por Hora do Dia",
+        "weekday": "Dia da Semana",
+        "hour_of_day": "Hora do Dia",
+        
+        # About page
+        "about_the_application": "Sobre a Aplicação",
+        "features": "Funcionalidades",
+        "data_analysis": "Análise de Dados",
+        "additional_resources": "Recursos Adicionais",
+        "how_to_use": "Como Usar",
+        "data_format": "Formato dos Dados",
+        "example_data": "Exemplo de Dados",
+        "technologies_used": "Tecnologias Utilizadas",
+        "frontend": "Frontend",
+        "data_analysis_tech": "Análise de Dados",
+        "infrastructure": "Infraestrutura",
+        "system_requirements": "Requisitos do Sistema",
+        
+        # Error messages
+        "no_data_loaded": "Nenhum dado foi carregado. Por favor, vá para a página 'Dashboard' e faça o upload de um arquivo Excel.",
+        "insufficient_data": "Dados insuficientes para análise.",
+        "select_valid_period": "Por favor, selecione um período válido para análise.",
+        "period_start_after_end": "A data inicial não pode ser posterior à data final."
+    },
+    "en": {
+        # Main menu and titles
+        "machine_efficiency_analysis": "Machine Efficiency Analysis",
+        "dashboard": "Dashboard",
+        "comparison": "Comparison",
+        "data": "Data",
+        "about": "About",
+        
+        # Common terms
+        "all": "All",
+        "all_months": "All Months",
+        "analyze": "Analyze",
+        "apply": "Apply",
+        "availability": "Availability",
+        "clear_data": "Clear Data",
+        "compare": "Compare",
+        "comparison": "Comparison",
+        "developed_with": "Developed with",
+        "download": "Download",
+        "duration": "Duration",
+        "duration_minutes": "Duration (minutes)",
+        "efficiency": "Operational Efficiency",
+        "export": "Export",
+        "filter_by": "Filter by",
+        "frequency": "Frequency",
+        "from": "From",
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December",
+        "last_update": "Last update",
+        "machine": "Machine",
+        "month": "Month",
+        "mtbf": "MTBF",
+        "mttr": "MTTR",
+        "number_of_stoppages": "Number of Stoppages",
+        "period": "Period",
+        "period_select": "Select Period",
+        "responsible_area": "Responsible Area",
+        "results": "Results",
+        "results_analysis": "Analysis Results",
+        "select": "Select",
+        "select_file": "Select a file",
+        "select_language": "Select Language",
+        "select_machine": "Select Machine",
+        "select_month": "Select Month",
+        "showing": "Showing",
+        "stoppages": "Stoppages",
+        "stoppage_cause": "Stoppage Cause",
+        "stoppage_type": "Stoppage Type",
+        "summary": "Summary",
+        "to": "To",
+        "total_duration_hours": "Total Duration (hours)",
+        "upload": "Upload",
+        "using": "using",
+        "version": "Version",
+        
+        # Dashboard page
+        "data_upload": "Data Upload",
+        "select_excel_file": "Select an Excel file with stoppage data",
+        "file_loaded_success": "File loaded successfully!",
+        "records_processed": "records processed.",
+        "error_processing_file": "Error processing file:",
+        "analysis_filters": "Analysis Filters",
+        "select_machine": "Select Machine:",
+        "select_month": "Select Month:",
+        "custom_period": "Custom Period",
+        "period_start": "Start Date:",
+        "period_end": "End Date:",
+        "analyze_button": "Analyze",
+        "analysis_summary": "Analysis Summary",
+        "period_analyzed": "Period Analyzed:",
+        "machine": "Machine:",
+        "scheduled_time": "Scheduled Time:",
+        "total_stoppages": "Total Stoppages:",
+        "total_stoppage_time": "Total Stoppage Time:",
+        "average_time_per_stoppage": "Average Time per Stoppage:",
+        "summary_tables": "Summary Tables",
+        "top_10_most_frequent": "Top 10 Most Frequent Stoppages",
+        "top_10_longest": "Top 10 Longest Stoppages",
+        "temporal_analysis": "Temporal Analysis",
+        "graphical_analysis": "Graphical Analysis",
+        "critical_stoppages_analysis": "Critical Stoppages Analysis",
+        "recommendations": "Recommendations",
+        "insights_recommended_actions": "Insights and Recommended Actions",
+        "export_results": "Export Results",
+        "download_analyzed_data": "Download analyzed data",
+        "download_critical_stoppages": "Download critical stoppages",
+        
+        # Chart titles
+        "pareto_stoppages_title": "Pareto of Stoppage Causes (Top 10 by Duration)",
+        "stoppages_by_area_title": "Stoppage Index by Responsible Area",
+        "stoppages_by_month_title": "Stoppage Occurrence Rate by Month",
+        "total_duration_by_month_title": "Total Stoppage Duration by Month",
+        "total_time_by_area_title": "Total Stoppage Time by Area",
+        "critical_stoppages_title": "Top 10 Critical Stoppages (>1h)",
+        "critical_stoppages_by_area_title": "Distribution of Critical Stoppages by Area",
+        "duration_distribution_title": "Distribution of Stoppage Durations",
+        
+        # Comparison page
+        "period_comparison": "Period Comparison",
+        "period_1": "Period 1",
+        "period_2": "Period 2",
+        "comparison_period_start": "Start Date",
+        "comparison_period_end": "End Date",
+        "compare_button": "Compare Periods",
+        "comparison_results": "Comparison Results",
+        "period_1_summary": "Period 1 Summary",
+        "period_2_summary": "Period 2 Summary",
+        "evolution": "Evolution",
+        "metrics_comparison": "Metrics Comparison",
+        "key_indicators": "Key Indicators",
+        "improved": "Improved",
+        "worsened": "Worsened",
+        "unchanged": "Unchanged",
+        "comparison_conclusions": "Comparison Conclusions",
+        
+        # Data page
+        "data_visualization": "Data Visualization",
+        "filter_by_machine": "Filter by Machine:",
+        "filter_by_month": "Filter by Month:",
+        "showing_records": "Showing records",
+        "download_filtered_data": "Download filtered data",
+        "basic_statistics": "Basic Statistics",
+        "summary_by_machine": "Summary by Machine",
+        "number_of_stoppages": "Number of Stoppages",
+        "total_duration": "Total Duration",
+        "average_duration": "Average Duration",
+        "download_machine_summary": "Download machine summary",
+        "additional_analyses": "Additional Analyses",
+        "distribution_by_weekday": "Distribution by Weekday",
+        "distribution_by_hour": "Distribution by Hour of Day",
+        "weekday": "Weekday",
+        "hour_of_day": "Hour of Day",
+        
+        # About page
+        "about_the_application": "About the Application",
+        "features": "Features",
+        "data_analysis": "Data Analysis",
+        "additional_resources": "Additional Resources",
+        "how_to_use": "How to Use",
+        "data_format": "Data Format",
+        "example_data": "Example Data",
+        "technologies_used": "Technologies Used",
+        "frontend": "Frontend",
+        "data_analysis_tech": "Data Analysis",
+        "infrastructure": "Infrastructure",
+        "system_requirements": "System Requirements",
+        
+        # Error messages
+        "no_data_loaded": "No data has been loaded. Please go to the 'Dashboard' page and upload an Excel file.",
+        "insufficient_data": "Insufficient data for analysis.",
+        "select_valid_period": "Please select a valid period for analysis.",
+        "period_start_after_end": "The start date cannot be after the end date."
+    }
+}
+
+@lru_cache(maxsize=128)
+def get_translation(language=None):
+    """Get translations for the specified language."""
+    if language is None and 'language' in st.session_state:
+        language = st.session_state.language
+    elif language is None:
+        language = 'pt'  # Default to Portuguese
+    
+    def translate(key):
+        if key in translations[language]:
+            return translations[language][key]
+        # Fallback to English if key not found in current language
+        elif key in translations['en']:
+            return translations['en'][key]
+        else:
+            return key  # Return the key itself if not found in any language
+    
+    return translate
+
+def setup_language_selector():
+    """Set up the language selector in the sidebar."""
+    st.sidebar.title("🌐 " + ("Language" if st.session_state.language == 'en' else "Idioma"))
+    
+    # Create a container for the language buttons
+    lang_container = st.sidebar.container()
+    
+    # Create two columns for the language buttons
+    col1, col2 = lang_container.columns(2)
+    
+    # Portuguese button
+    if col1.button("🇧🇷 Português", use_container_width=True, 
+                   type="primary" if st.session_state.language == 'pt' else "secondary"):
+        st.session_state.language = 'pt'
+        st.rerun()
+    
+    # English button
+    if col2.button("🇺🇸 English", use_container_width=True,
+                   type="primary" if st.session_state.language == 'en' else "secondary"):
+        st.session_state.language = 'en'
+        st.rerun()
+    
+    # Add some space
+    st.sidebar.markdown("---")
