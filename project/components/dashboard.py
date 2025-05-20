@@ -97,8 +97,63 @@ def show_dashboard():
                             st.warning(t("no_data_after_filters"))
                             return
                         
-                        # Continue with existing analysis code...
+                        # Calculate scheduled time
+                        scheduled_time, scheduled_hours = calculate_scheduled_time(filtered_data, selected_month)
                         
+                        # Calculate indicators
+                        availability = calculate_availability(filtered_data, scheduled_time)
+                        efficiency = calculate_operational_efficiency(filtered_data, scheduled_time)
+                        average_time = calculate_average_downtime(filtered_data)
+                        mtbf, mttr = calculate_mtbf_mttr(filtered_data, scheduled_time)
+                        
+                        # Calculate total downtime in hours
+                        total_downtime = filtered_data['Duração'].sum()
+                        total_downtime_hours = total_downtime.total_seconds() / 3600
+                        
+                        # Generate recommendations
+                        recommendations = generate_recommendations(filtered_data, availability, efficiency)
+                        
+                        # Additional analyses
+                        area_index = calculate_stoppage_by_area(filtered_data)
+                        pareto = pareto_stoppage_causes(filtered_data)
+                        occurrences = calculate_stoppage_occurrence_rate(filtered_data)
+                        area_time = calculate_total_stoppage_time_by_area(filtered_data)
+                        monthly_duration = calculate_total_duration_by_month(filtered_data)
+                        frequent_stoppages = most_frequent_stoppages(filtered_data)
+                        
+                        # Critical stoppages analysis
+                        critical_stoppages, critical_percentage = identify_critical_stoppages(filtered_data)
+                        top_critical_stoppages = critical_stoppages.groupby('Parada')['Duração'].sum().sort_values(ascending=False).head(10)
+                        
+                        # Store results in session state
+                        st.session_state.resultados = {
+                            'filtered_data': filtered_data,
+                            'availability': availability,
+                            'efficiency': efficiency,
+                            'average_time': average_time,
+                            'total_downtime': total_downtime,
+                            'total_downtime_hours': total_downtime_hours,
+                            'total_stoppages': len(filtered_data),
+                            'mtbf': mtbf,
+                            'mttr': mttr,
+                            'area_index': area_index,
+                            'pareto': pareto,
+                            'occurrences': occurrences,
+                            'area_time': area_time,
+                            'critical_stoppages': critical_stoppages,
+                            'critical_percentage': critical_percentage,
+                            'top_critical_stoppages': top_critical_stoppages,
+                            'recommendations': recommendations,
+                            'selected_machine': selected_machine,
+                            'selected_month': selected_month,
+                            'scheduled_hours': scheduled_hours,
+                            'frequent_stoppages': frequent_stoppages,
+                            'monthly_duration': monthly_duration,
+                            'date_range': None
+                        }
+                        
+                        st.rerun()
+            
             with clear_col:
                 if st.button(t("clear_filters"), key="btn_clear_filters", use_container_width=True):
                     st.session_state.weekend_filter = False
