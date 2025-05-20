@@ -15,6 +15,7 @@ from utils.visualizations import (
     create_monthly_duration_chart, create_area_time_chart, create_critical_stoppages_chart,
     create_critical_areas_pie_chart, create_duration_distribution_chart
 )
+from utils.i18n import get_translation
 
 def show_dashboard():
     """Exibe a página do painel principal."""
