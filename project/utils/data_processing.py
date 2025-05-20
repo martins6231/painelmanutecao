@@ -65,6 +65,12 @@ def process_data(df):
     # Add hour of day for time-based analysis
     df_processed['Hora'] = df_processed['Inicio'].dt.hour
     
+    # Add weekend indicator
+    df_processed['É_Fim_De_Semana'] = df_processed['Dia_Semana'].isin([5, 6])  # 5=Saturday, 6=Sunday
+    
+    # Add night shift indicator (22:00-06:00)
+    df_processed['É_Turno_Noite'] = (df_processed['Hora'] >= 22) | (df_processed['Hora'] < 6)
+    
     # Remove records with missing values in essential columns
     df_processed = df_processed.dropna(subset=['Máquina', 'Inicio', 'Fim', 'Duração'])
     
@@ -118,10 +124,12 @@ def filter_data_by_date_range(df, start_date, end_date):
     return df
 
 @st.cache_data
-def filter_data(df, machine, month=None, start_date=None, end_date=None):
-    """Filter data based on machine, month, or date range."""
+def filter_data(df, machine, month=None, start_date=None, end_date=None, 
+                only_weekends=False, only_night_shift=False, responsible_area=None):
+    """Filter data based on multiple criteria."""
     filtered_data = df.copy()
     
+    # Basic filters
     if machine != "Todas" and machine != "All":
         filtered_data = filtered_data[filtered_data['Máquina'] == machine]
     
@@ -129,10 +137,20 @@ def filter_data(df, machine, month=None, start_date=None, end_date=None):
     if month and month != "Todos" and month != "All":
         filtered_data = filtered_data[filtered_data['Ano-Mês'] == month]
     
-    # Filter by date range if specified (overrides month filter)
+    # Filter by date range if specified
     if start_date and end_date:
         filtered_data = filtered_data[(filtered_data['Inicio'] >= start_date) & 
-                                      (filtered_data['Inicio'] <= end_date)]
+                                    (filtered_data['Inicio'] <= end_date)]
+    
+    # Advanced filters
+    if only_weekends:
+        filtered_data = filtered_data[filtered_data['É_Fim_De_Semana']]
+    
+    if only_night_shift:
+        filtered_data = filtered_data[filtered_data['É_Turno_Noite']]
+    
+    if responsible_area and responsible_area != "Todas" and responsible_area != "All":
+        filtered_data = filtered_data[filtered_data['Área Responsável'] == responsible_area]
     
     return filtered_data
 
