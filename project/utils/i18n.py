@@ -197,7 +197,19 @@ translations = {
         "insufficient_data": "Dados insuficientes para análise.",
         "select_valid_period": "Por favor, selecione um período válido para análise.",
         "period_start_after_end": "A data inicial não pode ser posterior à data final.",
-        "analyzing_data": "Analisando dados..."
+        "analyzing_data": "Analisando dados...",
+
+        # Advanced filters
+        "advanced_filters": "Filtros Avançados",
+        "only_weekends": "Apenas Fins de Semana",
+        "only_night_shift": "Apenas Turno Noturno (22:00-06:00)",
+        "responsible_area": "Área Responsável",
+        "all_areas": "Todas as Áreas",
+        "filter_settings": "Configurações de Filtro",
+        "apply_filters": "Aplicar Filtros",
+        "clear_filters": "Limpar Filtros",
+        "filtered_results": "Resultados Filtrados",
+        "no_data_after_filters": "Nenhum dado encontrado com os filtros aplicados"
     },
     "en": {
         # Main menu and titles
@@ -392,7 +404,19 @@ translations = {
         "insufficient_data": "Insufficient data for analysis.",
         "select_valid_period": "Please select a valid period for analysis.",
         "period_start_after_end": "The start date cannot be after the end date.",
-        "analyzing_data": "Analyzing data..."
+        "analyzing_data": "Analyzing data...",
+
+        # Advanced filters
+        "advanced_filters": "Advanced Filters",
+        "only_weekends": "Weekends Only",
+        "only_night_shift": "Night Shift Only (22:00-06:00)",
+        "responsible_area": "Responsible Area",
+        "all_areas": "All Areas",
+        "filter_settings": "Filter Settings",
+        "apply_filters": "Apply Filters",
+        "clear_filters": "Clear Filters",
+        "filtered_results": "Filtered Results",
+        "no_data_after_filters": "No data found with applied filters"
     }
 }
 
