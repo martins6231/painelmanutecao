@@ -18,6 +18,7 @@ from utils.visualizations import (
 
 def show_dashboard():
     """Exibe a página do painel principal."""
+    t = get_translation()
     
     # Seção de upload de dados
     with st.container():
@@ -40,198 +41,69 @@ def show_dashboard():
     if st.session_state.df is not None:
         with st.container():
             st.markdown('<div class="content-box">', unsafe_allow_html=True)
-            st.markdown("### 🔍 Filtros de Análise")
+            st.markdown(f"### 🔍 {t('analysis_filters')}")
             
-            tab1, tab2 = st.tabs(["Filtros Padrão", "Período Personalizado"])
+            # Create tabs for basic and advanced filters
+            basic_tab, advanced_tab = st.tabs([t("filter_settings"), t("advanced_filters")])
             
-            with tab1:
+            with basic_tab:
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    # Filtro de máquina
+                    # Machine filter
                     available_machines = ["Todas"] + sorted(st.session_state.df['Máquina'].unique().tolist())
-                    selected_machine = st.selectbox("Selecione a Máquina", available_machines)
+                    selected_machine = st.selectbox(t("select_machine"), available_machines)
                 
                 with col2:
-                    # Filtro de mês
+                    # Month filter
                     available_months = ["Todos"] + sorted(st.session_state.df['Ano-Mês'].unique().tolist())
-                    selected_month = st.selectbox("Selecione o Mês", available_months)
-                
-                # Botão de análise
-                analyze_col1, _ = st.columns([1, 3])
-                with analyze_col1:
-                    if st.button("Analisar", key="btn_analyze_standard", use_container_width=True):
-                        with st.spinner('Analisando dados...'):
-                            # Filtrar dados
-                            filtered_data = filter_data(st.session_state.df, selected_machine, selected_month)
-                            
-                            # Calcular tempo programado
-                            scheduled_time, scheduled_hours = calculate_scheduled_time(filtered_data, selected_month)
-                            
-                            # Calcular indicadores
-                            availability = calculate_availability(filtered_data, scheduled_time)
-                            efficiency = calculate_operational_efficiency(filtered_data, scheduled_time)
-                            average_time = calculate_average_downtime(filtered_data)
-                            mtbf, mttr = calculate_mtbf_mttr(filtered_data, scheduled_time)
-                            
-                            # Calcular tempo total de parada em horas
-                            total_downtime = filtered_data['Duração'].sum()
-                            total_downtime_hours = total_downtime.total_seconds() / 3600
-                            
-                            # Gerar recomendações
-                            recommendations = generate_recommendations(filtered_data, availability, efficiency)
-                            
-                            # Análises adicionais
-                            area_index = calculate_stoppage_by_area(filtered_data)
-                            pareto = pareto_stoppage_causes(filtered_data)
-                            occurrences = calculate_stoppage_occurrence_rate(filtered_data)
-                            area_time = calculate_total_stoppage_time_by_area(filtered_data)
-                            monthly_duration = calculate_total_duration_by_month(filtered_data)
-                            frequent_stoppages = most_frequent_stoppages(filtered_data)
-                            
-                            # Análise de paradas críticas
-                            critical_stoppages, critical_percentage = identify_critical_stoppages(filtered_data)
-                            top_critical_stoppages = critical_stoppages.groupby('Parada')['Duração'].sum().sort_values(ascending=False).head(10)
-                            
-                            # Armazenar resultados no estado da sessão
-                            st.session_state.resultados = {
-                                'filtered_data': filtered_data,
-                                'availability': availability,
-                                'efficiency': efficiency,
-                                'average_time': average_time,
-                                'total_downtime': total_downtime,
-                                'total_downtime_hours': total_downtime_hours,
-                                'total_stoppages': len(filtered_data),
-                                'mtbf': mtbf,
-                                'mttr': mttr,
-                                'area_index': area_index,
-                                'pareto': pareto,
-                                'occurrences': occurrences,
-                                'area_time': area_time,
-                                'critical_stoppages': critical_stoppages,
-                                'critical_percentage': critical_percentage,
-                                'top_critical_stoppages': top_critical_stoppages,
-                                'recommendations': recommendations,
-                                'selected_machine': selected_machine,
-                                'selected_month': selected_month,
-                                'scheduled_hours': scheduled_hours,
-                                'frequent_stoppages': frequent_stoppages,
-                                'monthly_duration': monthly_duration,
-                                'date_range': None
-                            }
+                    selected_month = st.selectbox(t("select_month"), available_months)
             
-            with tab2:
+            with advanced_tab:
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    # Filtro de máquina
-                    available_machines = ["Todas"] + sorted(st.session_state.df['Máquina'].unique().tolist())
-                    selected_machine_custom = st.selectbox("Selecione a Máquina", available_machines, key="machine_custom")
+                    # Weekend filter
+                    only_weekends = st.checkbox(t("only_weekends"), key="weekend_filter")
                     
-                    # Data inicial
-                    min_date = st.session_state.df['Inicio'].min().date()
-                    max_date = st.session_state.df['Inicio'].max().date()
-                    
-                    start_date = st.date_input(
-                        "Data Inicial", 
-                        value=min_date,
-                        min_value=min_date,
-                        max_value=max_date,
-                        key="start_date"
-                    )
+                    # Night shift filter
+                    only_night_shift = st.checkbox(t("only_night_shift"), key="night_shift_filter")
                 
                 with col2:
-                    # Data final
-                    end_date = st.date_input(
-                        "Data Final", 
-                        value=max_date,
-                        min_value=min_date,
-                        max_value=max_date,
-                        key="end_date"
-                    )
-                    
-                    # Validar intervalo de datas
-                    if start_date > end_date:
-                        st.error("A data inicial não pode ser posterior à data final")
-                
-                # Botão de análise
-                analyze_col1, _ = st.columns([1, 3])
-                with analyze_col1:
-                    if st.button("Analisar", key="btn_analyze_custom", use_container_width=True):
-                        if start_date <= end_date:
-                            with st.spinner('Analisando dados...'):
-                                # Converter datas para datetime
-                                start_datetime = datetime.combine(start_date, datetime.min.time())
-                                end_datetime = datetime.combine(end_date, datetime.max.time())
-                                
-                                # Filtrar dados por intervalo de datas
-                                filtered_data = filter_data(
-                                    st.session_state.df, 
-                                    selected_machine_custom, 
-                                    start_date=start_datetime, 
-                                    end_date=end_datetime
-                                )
-                                
-                                # Calcular tempo programado baseado no intervalo de datas
-                                scheduled_time, scheduled_hours = calculate_scheduled_time(
-                                    filtered_data, 
-                                    start_date=start_datetime,
-                                    end_date=end_datetime
-                                )
-                                
-                                # Calcular indicadores
-                                availability = calculate_availability(filtered_data, scheduled_time)
-                                efficiency = calculate_operational_efficiency(filtered_data, scheduled_time)
-                                average_time = calculate_average_downtime(filtered_data)
-                                mtbf, mttr = calculate_mtbf_mttr(filtered_data, scheduled_time)
-                                
-                                # Calcular tempo total de parada em horas
-                                total_downtime = filtered_data['Duração'].sum()
-                                total_downtime_hours = total_downtime.total_seconds() / 3600
-                                
-                                # Gerar recomendações
-                                recommendations = generate_recommendations(filtered_data, availability, efficiency)
-                                
-                                # Análises adicionais
-                                area_index = calculate_stoppage_by_area(filtered_data)
-                                pareto = pareto_stoppage_causes(filtered_data)
-                                occurrences = calculate_stoppage_occurrence_rate(filtered_data)
-                                area_time = calculate_total_stoppage_time_by_area(filtered_data)
-                                monthly_duration = calculate_total_duration_by_month(filtered_data)
-                                frequent_stoppages = most_frequent_stoppages(filtered_data)
-                                
-                                # Análise de paradas críticas
-                                critical_stoppages, critical_percentage = identify_critical_stoppages(filtered_data)
-                                top_critical_stoppages = critical_stoppages.groupby('Parada')['Duração'].sum().sort_values(ascending=False).head(10)
-                                
-                                # Armazenar resultados no estado da sessão
-                                st.session_state.resultados = {
-                                    'filtered_data': filtered_data,
-                                    'availability': availability,
-                                    'efficiency': efficiency,
-                                    'average_time': average_time,
-                                    'total_downtime': total_downtime,
-                                    'total_downtime_hours': total_downtime_hours,
-                                    'total_stoppages': len(filtered_data),
-                                    'mtbf': mtbf,
-                                    'mttr': mttr,
-                                    'area_index': area_index,
-                                    'pareto': pareto,
-                                    'occurrences': occurrences,
-                                    'area_time': area_time,
-                                    'critical_stoppages': critical_stoppages,
-                                    'critical_percentage': critical_percentage,
-                                    'top_critical_stoppages': top_critical_stoppages,
-                                    'recommendations': recommendations,
-                                    'selected_machine': selected_machine_custom,
-                                    'selected_month': None,
-                                    'scheduled_hours': scheduled_hours,
-                                    'frequent_stoppages': frequent_stoppages,
-                                    'monthly_duration': monthly_duration,
-                                    'date_range': (start_date, end_date)
-                                }
-                        else:
-                            st.error("A data inicial não pode ser posterior à data final")
+                    # Responsible area filter
+                    available_areas = [t("all_areas")] + sorted(st.session_state.df['Área Responsável'].unique().tolist())
+                    selected_area = st.selectbox(t("responsible_area"), available_areas, key="area_filter")
+            
+            # Analysis button
+            analyze_col1, clear_col, _ = st.columns([1, 1, 2])
+            with analyze_col1:
+                if st.button(t("analyze_button"), key="btn_analyze", use_container_width=True):
+                    with st.spinner(t("analyzing_data")):
+                        # Convert area selection to internal format
+                        area_for_filter = None if selected_area == t("all_areas") else selected_area
+                        
+                        # Filter data with all criteria
+                        filtered_data = filter_data(
+                            st.session_state.df,
+                            selected_machine,
+                            selected_month,
+                            only_weekends=only_weekends,
+                            only_night_shift=only_night_shift,
+                            responsible_area=area_for_filter
+                        )
+                        
+                        if filtered_data.empty:
+                            st.warning(t("no_data_after_filters"))
+                            return
+                        
+                        # Continue with existing analysis code...
+                        
+            with clear_col:
+                if st.button(t("clear_filters"), key="btn_clear_filters", use_container_width=True):
+                    st.session_state.weekend_filter = False
+                    st.session_state.night_shift_filter = False
+                    st.session_state.area_filter = t("all_areas")
+                    st.rerun()
             
             st.markdown('</div>', unsafe_allow_html=True)
         
