@@ -1,15 +1,15 @@
-# Análise de Eficiência de Máquinas v3.0.0
+# Análise de Eficiência de Máquinas v3.1.0
 
-Sistema de análise e monitoramento de eficiência de máquinas industriais, desenvolvido para otimizar a gestão de manutenção e melhorar a tomada de decisões.
+Sistema de análise e monitoramento de máquinas industriais, desenvolvido para otimizar a gestão de manutenção e melhorar a tomada de decisões.
 
-## 🚀 Novidades da Versão 3.0.0
+## 🚀 Novidades da Versão 3.1.0
 
 ### Interface e Usabilidade
-- Interface totalmente em português brasileiro
-- Novo layout otimizado sem barra lateral
-- Tipografia padronizada e mais legível
-- Melhor hierarquia visual dos elementos
-- Navegação simplificada e intuitiva
+- Novo seletor de intervalo de datas na visualização de dados
+- Análise de distribuição por turnos de trabalho
+- Interface otimizada sem indicador de eficiência
+- Layout responsivo e intuitivo
+- Melhor organização visual dos elementos
 
 ### Análise de Dados
 - Painel principal com métricas essenciais
@@ -36,10 +36,10 @@ Sistema de análise e monitoramento de eficiência de máquinas industriais, des
 
 ### Indicadores
 - Disponibilidade
-- Eficiência Operacional
 - MTBF (Tempo Médio Entre Falhas)
 - MTTR (Tempo Médio Para Reparo)
 - Análise de Paradas Críticas
+- Distribuição por Turnos
 
 ### Visualizações
 - Gráficos de Pareto
