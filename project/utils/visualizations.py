@@ -449,7 +449,7 @@ def create_comparison_gauge_chart(value1, value2, title, max_value=100, language
     fig.add_trace(go.Indicator(
         mode="gauge+number+delta",
         value=value2,
-        title={"text": f"Disponibilidade Comparação<br><span style='font-size:0.8em;color:gray'>{t('period')} 2</span>"},
+        title={"text": "Disponibilidade Comparação"},
         delta={'reference': value1, 'relative': True, 'valueformat': '.1f%'},
         gauge={
             'axis': {'range': [None, max_value], 'tickwidth': 1, 'tickcolor': "darkblue"},
